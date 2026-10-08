@@ -1,6 +1,6 @@
 /**
  * BeautyLoka — Seed Script
- * Jalankan: cd /home/z/my-project && bun run scripts/seed.ts
+ * Jalankan dari root proyek: npx tsx scripts/seed.ts   (atau: bun run scripts/seed.ts)
  */
 import { PrismaClient } from '@prisma/client'
 import { createHash, randomBytes } from 'crypto'
@@ -19,7 +19,7 @@ function hashPassword(password: string, salt: string) {
 // ====== Load image URLs ======
 import { readFileSync } from 'fs'
 const IMG: Record<string, string[]> = JSON.parse(
-  readFileSync('/home/z/my-project/scripts/img/all_urls.json', 'utf-8')
+  readFileSync(new URL('./img/all_urls.json', import.meta.url), 'utf-8')
 )
 
 async function main() {

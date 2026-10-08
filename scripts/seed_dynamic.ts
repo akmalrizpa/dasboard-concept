@@ -1,6 +1,6 @@
 /**
  * BeautyLoka — Seed Konfigurasi Dinamis
- * Jalankan: cd /home/z/my-project && bun run scripts/seed_dynamic.ts
+ * Jalankan dari root proyek: npx tsx scripts/seed_dynamic.ts   (atau: bun run scripts/seed_dynamic.ts)
  * Mengisi: SiteSetting, FlashSale, ShippingMethod, PaymentMethod, Voucher, Article
  */
 import { PrismaClient } from '@prisma/client'
