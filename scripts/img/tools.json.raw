@@ -1,0 +1,40 @@
+🚀 Initializing Z-AI SDK...
+🔎 Searching images: "makeup brush set beauty tools pink"
+✅ Got 4 images
+{
+  "success": true,
+  "query": "makeup brush set beauty tools pink",
+  "count": 4,
+  "ranked": false,
+  "captioned_count": 0,
+  "results": [
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/da7cb7c3816d.png",
+      "caption": "",
+      "source": "CosmoGlo",
+      "original_width": "2000px",
+      "original_height": "2000px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/c24539fb3cdb.jpg",
+      "caption": "",
+      "source": "eBay",
+      "original_width": "1200px",
+      "original_height": "1200px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/23d8283eaa02.png",
+      "caption": "",
+      "source": "Caress",
+      "original_width": "1086px",
+      "original_height": "1448px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/d46347cec61d.jpg",
+      "caption": "",
+      "source": "XOXO Beauty & Cosmetics",
+      "original_width": "1080px",
+      "original_height": "1080px"
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+🚀 Initializing Z-AI SDK...
+🔎 Searching images: "sunscreen tube skincare product photography"
+✅ Got 6 images
+{
+  "success": true,
+  "query": "sunscreen tube skincare product photography",
+  "count": 6,
+  "ranked": false,
+  "captioned_count": 0,
+  "results": [
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/c5edd9d2b4fd.jpg",
+      "caption": "",
+      "source": "Pinterest",
+      "original_width": "736px",
+      "original_height": "1104px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/783db80f0fc1.jpg",
+      "caption": "",
+      "source": "Amazon.eg",
+      "original_width": "1024px",
+      "original_height": "1024px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/64f6a1b02534.jpg",
+      "caption": "",
+      "source": "DepositPhotos",
+      "original_width": "1600px",
+      "original_height": "1167px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/df22ba573b8b.jpeg",
+      "caption": "",
+      "source": "Pexels",
+      "original_width": "2988px",
+      "original_height": "3922px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/97da429febcb.jpg",
+      "caption": "",
+      "source": "Madara Cosmetics",
+      "original_width": "1638px",
+      "original_height": "2048px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/6fd6269ec0ec.jpg",
+      "caption": "",
+      "source": "South China Morning Post",
+      "original_width": "1024px",
+      "original_height": "1534px"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+🚀 Initializing Z-AI SDK...
+🔎 Searching images: "shampoo bottle hair care product"
+✅ Got 5 images
+{
+  "success": true,
+  "query": "shampoo bottle hair care product",
+  "count": 5,
+  "ranked": false,
+  "captioned_count": 0,
+  "results": [
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/da16dccf8bb7.jpg",
+      "caption": "",
+      "source": "Amazon.in",
+      "original_width": "1000px",
+      "original_height": "1000px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/43b14058d2ef.png",
+      "caption": "",
+      "source": "Polar Haircare",
+      "original_width": "1254px",
+      "original_height": "1254px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/0aaa5629fc3c.jpg",
+      "caption": "",
+      "source": "The Derma Co",
+      "original_width": "1080px",
+      "original_height": "1080px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/f44e9f9cd723.jpg",
+      "caption": "",
+      "source": "Women's Health",
+      "original_width": "980px",
+      "original_height": "980px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/130614f14828.jpg",
+      "caption": "",
+      "source": "Miracles USA",
+      "original_width": "2000px",
+      "original_height": "2000px"
+    }
+  ]
+}

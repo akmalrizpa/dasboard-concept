@@ -1,0 +1,47 @@
+🚀 Initializing Z-AI SDK...
+🔎 Searching images: "perfume bottle elegant luxury product"
+✅ Got 5 images
+{
+  "success": true,
+  "query": "perfume bottle elegant luxury product",
+  "count": 5,
+  "ranked": false,
+  "captioned_count": 0,
+  "results": [
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/bcfe9c34802b.png",
+      "caption": "",
+      "source": "eldawaelmasry.com",
+      "original_width": "1672px",
+      "original_height": "941px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/05edf25bdbb7.png",
+      "caption": "",
+      "source": "www.isakfragrances.com",
+      "original_width": "1200px",
+      "original_height": "1167px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/13d84157f70d.jpg",
+      "caption": "",
+      "source": "Leonardo AI",
+      "original_width": "1024px",
+      "original_height": "1024px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/118c6131fc71.jpg",
+      "caption": "",
+      "source": "Alamy",
+      "original_width": "1300px",
+      "original_height": "946px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/b7221c984271.webp",
+      "caption": "",
+      "source": "Aromique Fragrances",
+      "original_width": "800px",
+      "original_height": "1004px"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+🚀 Initializing Z-AI SDK...
+🔎 Searching images: "facial cleanser face wash tube product"
+✅ Got 4 images
+{
+  "success": true,
+  "query": "facial cleanser face wash tube product",
+  "count": 4,
+  "ranked": false,
+  "captioned_count": 0,
+  "results": [
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/4f97b7c777e9.png",
+      "caption": "",
+      "source": "Alibaba.com",
+      "original_width": "1823px",
+      "original_height": "1823px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/d5f686d8b088.jpg",
+      "caption": "",
+      "source": "eBay",
+      "original_width": "1200px",
+      "original_height": "1600px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/70d1780fac05.webp",
+      "caption": "",
+      "source": "mumuso.jo",
+      "original_width": "2560px",
+      "original_height": "2560px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/5bace9ea0688.webp",
+      "caption": "",
+      "source": "Clean & Clear® | Acne Treatment & Skincare",
+      "original_width": "1200px",
+      "original_height": "1200px"
+    }
+  ]
+}

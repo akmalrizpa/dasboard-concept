@@ -1,0 +1,28 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "Berdasarkan screenshot yang Anda berikan, berikut hasil verifikasinya:\n\n1.  **4 Kartu Statistik:** **Ya, tampil sempurna.** Terdapat kartu untuk Pendapatan (Rp125.000), Pesanan Hari Ini (2), Total Produk (32), dan Total Pelanggan (9).\n2.  **Grafik:** **Ya, ter-render dengan data.**\n    *   **Area Chart:** Tren Pendapatan menampilkan grafik garis/area dengan data fluktuatif.\n    *   **Pie Chart (Donut):** Status Pesanan menampilkan diagram lingkaran dengan kategori warna-warni.\n    *   **Bar Chart:** Jumlah Pesanan/Hari menampilkan grafik batang vertikal.\n3.  **Tabel:** **Ya, tampil lengkap.**\n    *   Tabel **Pesanan Terbaru** menampilkan daftar nomor pesanan dan nama pelanggan di bagian bawah.\n    *   Daftar **Produk Terlaris** tampil dalam format list/kartu kecil (bukan tabel grid tradisional, tapi informasinya ada).\n4.  **Error/Blank Section:** **Tidak ada.** Semua bagian dashboard terisi dengan konten, termasuk notifikasi \"Stok Menipis\" yang menyatakan \"Semua stok aman\". Tidak ada area kosong atau pesan error yang terlihat.\n\n**Kesimpulan:** Dashboard berhasil merender semua komponen utama dengan baik tanpa error visual.",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1791485717,
+  "id": "20261009025510cce00651839f4165",
+  "model": "glm-5v-turbo",
+  "object": "chat.completion",
+  "request_id": "20261009025510cce00651839f4165",
+  "usage": {
+    "completion_tokens": 338,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens": 3087,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "total_tokens": 3425
+  }
+}

@@ -1,0 +1,47 @@
+🚀 Initializing Z-AI SDK...
+🔎 Searching images: "clay mask skincare product jar"
+✅ Got 5 images
+{
+  "success": true,
+  "query": "clay mask skincare product jar",
+  "count": 5,
+  "ranked": false,
+  "captioned_count": 0,
+  "results": [
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/b403329b6bf8.jpg",
+      "caption": "",
+      "source": "Amazon.in",
+      "original_width": "1080px",
+      "original_height": "1080px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/3690ad8ee345.jpg",
+      "caption": "",
+      "source": "Bazaar5",
+      "original_width": "1500px",
+      "original_height": "1500px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/f1c1ea82c055.jpg",
+      "caption": "",
+      "source": "Floragy",
+      "original_width": "1600px",
+      "original_height": "2000px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/172642559aaa.jpg",
+      "caption": "",
+      "source": "Philosophy",
+      "original_width": "1200px",
+      "original_height": "1200px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/6ae503dd4d36.jpg",
+      "caption": "",
+      "source": "Bella Botanicals",
+      "original_width": "2048px",
+      "original_height": "2048px"
+    }
+  ]
+}

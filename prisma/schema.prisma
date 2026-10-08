@@ -1,0 +1,145 @@
+// BeautyLoka — Prisma Schema
+// Beauty e-commerce webstore (Sociolla-style) + Admin Dashboard
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  image     String?
+  icon      String? // emoji icon fallback
+  sortOrder Int       @default(0)
+  products  Product[]
+  createdAt DateTime  @default(now())
+}
+
+model Brand {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  isFeatured Boolean  @default(false)
+  products  Product[]
+  createdAt DateTime  @default(now())
+}
+
+model Product {
+  id            String      @id @default(cuid())
+  name          String
+  slug          String      @unique
+  description   String
+  price         Int // harga jual (IDR)
+  originalPrice Int? // harga sebelum diskon (IDR)
+  stock         Int         @default(0)
+  rating        Float       @default(0)
+  reviewCount   Int         @default(0)
+  sold          Int         @default(0)
+  image         String // main image URL
+  isFlashSale   Boolean     @default(false)
+  flashPrice    Int?
+  flashStock    Int         @default(0)
+  flashSold     Int         @default(0)
+  isActive      Boolean     @default(true)
+  categoryId    String
+  category      Category    @relation(fields: [categoryId], references: [id])
+  brandId       String
+  brand         Brand       @relation(fields: [brandId], references: [id])
+  reviews       Review[]
+  orderItems    OrderItem[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([categoryId])
+  @@index([brandId])
+  @@index([isFlashSale])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  author    String
+  rating    Int // 1-5
+  comment   String
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+}
+
+model Customer {
+  id         String   @id @default(cuid())
+  name       String
+  email      String   @unique
+  phone      String?
+  address    String?
+  city       String?
+  postalCode String?
+  orders     Order[]
+  createdAt  DateTime @default(now())
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  orderNumber   String      @unique
+  customerId    String?
+  customer      Customer?   @relation(fields: [customerId], references: [id])
+  customerName  String
+  email         String
+  phone         String
+  address       String
+  city          String
+  postalCode    String
+  notes         String?
+  subtotal      Int
+  shippingCost  Int         @default(0)
+  discount      Int         @default(0)
+  total         Int
+  paymentMethod String
+  status        String      @default("PENDING") // PENDING | CONFIRMED | PROCESSED | SHIPPED | DELIVERED | CANCELLED
+  items         OrderItem[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  name      String // snapshot nama produk
+  image     String // snapshot gambar produk
+  quantity  Int
+  price     Int // harga satari saat pembelian
+
+  @@index([orderId])
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String // sha256(salt + password)
+  salt      String
+  name      String
+  createdAt DateTime @default(now())
+}
+
+model Banner {
+  id        String   @id @default(cuid())
+  title     String
+  subtitle  String?
+  image     String
+  link      String?
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+}

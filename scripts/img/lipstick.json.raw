@@ -1,0 +1,54 @@
+🚀 Initializing Z-AI SDK...
+🔎 Searching images: "red lipstick cosmetic product photography"
+✅ Got 6 images
+{
+  "success": true,
+  "query": "red lipstick cosmetic product photography",
+  "count": 6,
+  "ranked": false,
+  "captioned_count": 0,
+  "results": [
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/acbbdfbca90c.jpg",
+      "caption": "",
+      "source": "Dreamstime",
+      "original_width": "1600px",
+      "original_height": "987px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/70ba66916043.jpg",
+      "caption": "",
+      "source": "howlett photography",
+      "original_width": "926px",
+      "original_height": "1500px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/9f319e21ef3c.jpg",
+      "caption": "",
+      "source": "Photigy",
+      "original_width": "2024px",
+      "original_height": "1333px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/71c9e6e52bc0.jpg",
+      "caption": "",
+      "source": "Allure",
+      "original_width": "1600px",
+      "original_height": "2400px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/61c48316da73.jpg",
+      "caption": "",
+      "source": "Amy Roth",
+      "original_width": "1500px",
+      "original_height": "1500px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/651595421dcf.jpg",
+      "caption": "",
+      "source": "Pinterest",
+      "original_width": "736px",
+      "original_height": "1104px"
+    }
+  ]
+}

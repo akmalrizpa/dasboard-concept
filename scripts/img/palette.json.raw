@@ -1,0 +1,47 @@
+🚀 Initializing Z-AI SDK...
+🔎 Searching images: "eyeshadow palette colorful makeup product"
+✅ Got 5 images
+{
+  "success": true,
+  "query": "eyeshadow palette colorful makeup product",
+  "count": 5,
+  "ranked": false,
+  "captioned_count": 0,
+  "results": [
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/79f652e41450.jpg",
+      "caption": "",
+      "source": "",
+      "original_width": "3731px",
+      "original_height": "3731px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/10599460d6ab.jpg",
+      "caption": "",
+      "source": "",
+      "original_width": "1600px",
+      "original_height": "1600px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/636bfe904109.jpg",
+      "caption": "",
+      "source": "",
+      "original_width": "990px",
+      "original_height": "1000px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/07f097f01e46.jpg",
+      "caption": "",
+      "source": "",
+      "original_width": "1600px",
+      "original_height": "1600px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/edcb3c3925f0.jpg",
+      "caption": "",
+      "source": "",
+      "original_width": "999px",
+      "original_height": "1000px"
+    }
+  ]
+}

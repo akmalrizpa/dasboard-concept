@@ -1,0 +1,54 @@
+🚀 Initializing Z-AI SDK...
+🔎 Searching images: "moisturizer cream jar skincare product"
+✅ Got 6 images
+{
+  "success": true,
+  "query": "moisturizer cream jar skincare product",
+  "count": 6,
+  "ranked": false,
+  "captioned_count": 0,
+  "results": [
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/1f86851c5202.jpg",
+      "caption": "",
+      "source": "build (skincare)",
+      "original_width": "1920px",
+      "original_height": "1920px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/4068892a4c10.jpg",
+      "caption": "",
+      "source": "Made-in-China.com",
+      "original_width": "1500px",
+      "original_height": "1500px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/3aebf8af196a.jpg",
+      "caption": "",
+      "source": "Wellness Warehouse",
+      "original_width": "1000px",
+      "original_height": "1000px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/9955618b36dc.png",
+      "caption": "",
+      "source": "Alibaba.com",
+      "original_width": "1024px",
+      "original_height": "1024px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/df6ea16a7956.png",
+      "caption": "",
+      "source": "eBay",
+      "original_width": "810px",
+      "original_height": "1200px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/bb5bb75c7351.png",
+      "caption": "",
+      "source": "Sephora Australia",
+      "original_width": "1000px",
+      "original_height": "1000px"
+    }
+  ]
+}

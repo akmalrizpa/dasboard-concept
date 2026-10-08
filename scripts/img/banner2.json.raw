@@ -1,0 +1,54 @@
+🚀 Initializing Z-AI SDK...
+🔎 Searching images: "woman applying skincare cream face beauty"
+✅ Got 6 images
+{
+  "success": true,
+  "query": "woman applying skincare cream face beauty",
+  "count": 6,
+  "ranked": false,
+  "captioned_count": 0,
+  "results": [
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/a3751c046885.jpg",
+      "caption": "",
+      "source": "DepositPhotos",
+      "original_width": "1067px",
+      "original_height": "1700px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/210d8fba22bb.jpg",
+      "caption": "",
+      "source": "Allure",
+      "original_width": "1561px",
+      "original_height": "878px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/a3ed2c08cb5f.jpeg",
+      "caption": "",
+      "source": "Pexels",
+      "original_width": "6720px",
+      "original_height": "4480px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/878b06085b2e.webp",
+      "caption": "",
+      "source": "Buddha Beauty Skincare",
+      "original_width": "1080px",
+      "original_height": "1080px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/f9b64286e3f2.jpg",
+      "caption": "",
+      "source": "Marie Claire",
+      "original_width": "5760px",
+      "original_height": "3245px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/3415f31bb1f4.jpeg",
+      "caption": "",
+      "source": "Pexels",
+      "original_width": "4383px",
+      "original_height": "6574px"
+    }
+  ]
+}

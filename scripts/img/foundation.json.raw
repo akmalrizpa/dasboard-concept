@@ -1,0 +1,47 @@
+🚀 Initializing Z-AI SDK...
+🔎 Searching images: "liquid foundation makeup bottle product photography"
+✅ Got 5 images
+{
+  "success": true,
+  "query": "liquid foundation makeup bottle product photography",
+  "count": 5,
+  "ranked": false,
+  "captioned_count": 0,
+  "results": [
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/11517bb354c9.jpg",
+      "caption": "",
+      "source": "yamuna",
+      "original_width": "2437px",
+      "original_height": "2437px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/bdfc8e2c139b.jpg",
+      "caption": "",
+      "source": "Stargazer Products",
+      "original_width": "1024px",
+      "original_height": "1024px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/9351bed0a873.jpg",
+      "caption": "",
+      "source": "berndruf.de",
+      "original_width": "1080px",
+      "original_height": "1080px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/f84312c29327.jpg",
+      "caption": "",
+      "source": "Prime Prometics",
+      "original_width": "1200px",
+      "original_height": "1200px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/2499f0670245.png",
+      "caption": "",
+      "source": "Clinique",
+      "original_width": "1000px",
+      "original_height": "1000px"
+    }
+  ]
+}

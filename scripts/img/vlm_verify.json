@@ -1,0 +1,28 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "```json\n{\n  \"serum[1]\": \"ya\",\n  \"serum[3]\": \"tidak\",\n  \"sunscreen[0]\": \"tidak\",\n  \"sunscreen[1]\": \"tidak\",\n  \"sunscreen[2]\": \"ya\",\n  \"moisturizer[0]\": \"tidak\",\n  \"lipstick[0]\": \"ya\",\n  \"foundation[0]\": \"tidak\",\n  \"palette[1]\": \"tidak\",\n  \"palette[3]\": \"tidak\",\n  \"shampoo[4]\": \"tidak\",\n  \"perfume[3]\": \"ya\",\n  \"cleanser[0]\": \"tidak\",\n  \"bodylotion[2]\": \"tidak\"\n}\n```",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1791485577,
+  "id": "202610090252338170ed23698f4443",
+  "model": "glm-5v-turbo",
+  "object": "chat.completion",
+  "request_id": "202610090252338170ed23698f4443",
+  "usage": {
+    "completion_tokens": 172,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens": 41108,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "total_tokens": 41280
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "```json\n{\n  \"1\": \"ada watermark\",\n  \"2\": \"ada watermark\",\n  \"3\": \"ada watermark\",\n  \"4\": \"ada watermark\",\n  \"5\": \"ada watermark\",\n  \"6\": \"bersih\",\n  \"7\": \"ada watermark\",\n  \"8\": \"bersih\",\n  \"9\": \"bersih\",\n  \"10\": \"bersih\",\n  \"11\": \"bersih\",\n  \"12\": \"bersih\"\n}\n```",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1791485509,
+  "id": "20261009025126d1719a6f381c4ce8",
+  "model": "glm-5v-turbo",
+  "object": "chat.completion",
+  "request_id": "20261009025126d1719a6f381c4ce8",
+  "usage": {
+    "completion_tokens": 103,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens": 34904,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "total_tokens": 35007
+  }
+}

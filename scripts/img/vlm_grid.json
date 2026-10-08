@@ -1,0 +1,28 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "serum[1], serum[3], sunscreen[0], sunscreen[1], sunscreen[2], moisturizer[0], lipstick[0], foundation[0], palette[1], palette[3], shampoo[4], perfume[3], cleanser[0], bodylotion[2]",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1791485545,
+  "id": "20261009025221d128997fba5c48dc",
+  "model": "glm-5v-turbo",
+  "object": "chat.completion",
+  "request_id": "20261009025221d128997fba5c48dc",
+  "usage": {
+    "completion_tokens": 62,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens": 4023,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "total_tokens": 4085
+  }
+}

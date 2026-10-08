@@ -1,0 +1,68 @@
+🚀 Initializing Z-AI SDK...
+🔎 Searching images: "skincare serum glass bottle dropper product"
+✅ Got 8 images
+{
+  "success": true,
+  "query": "skincare serum glass bottle dropper product",
+  "count": 8,
+  "ranked": false,
+  "captioned_count": 0,
+  "results": [
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/e3cd83618f56.jpg",
+      "caption": "",
+      "source": "Ataliene",
+      "original_width": "1080px",
+      "original_height": "1080px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/58e76fd833ac.jpg",
+      "caption": "",
+      "source": "Alamy",
+      "original_width": "1300px",
+      "original_height": "1302px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/30da97f077a9.jpg",
+      "caption": "",
+      "source": "Sagesmask",
+      "original_width": "2000px",
+      "original_height": "2500px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/235f454c27e2.jpg",
+      "caption": "",
+      "source": "haodexin",
+      "original_width": "1300px",
+      "original_height": "975px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/353de4062cc2.jpg",
+      "caption": "",
+      "source": "123RF",
+      "original_width": "868px",
+      "original_height": "1300px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/c0b7cc7750b4.jpg",
+      "caption": "",
+      "source": "Alibaba.com",
+      "original_width": "1688px",
+      "original_height": "1688px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/772949e8c83d.jpg",
+      "caption": "",
+      "source": "Coloured Bottles",
+      "original_width": "1080px",
+      "original_height": "1080px"
+    },
+    {
+      "original_url": "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/6a3b6002f9d2.jpg",
+      "caption": "",
+      "source": "Unsplash",
+      "original_width": "3000px",
+      "original_height": "4500px"
+    }
+  ]
+}
