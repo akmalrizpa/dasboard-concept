@@ -51,3 +51,19 @@ Stage Summary:
 - ✅ Menu admin baru: Voucher & Promo + Pengaturan (6 tab)
 - ✅ Voucher system end-to-end: PERCENT/FIXED/FREE_SHIPPING, min. belanja, max diskon, kuota, periode
 - ✅ Semua perubahan langsung berlaku tanpa restart atau ubah kode
+
+---
+Task ID: 3
+Agent: main (Super Z)
+Task: Push project ke GitHub (repo akmalrizpa/dasboard-concept)
+
+Work Log:
+- Audit git: 4 commit lokal, remote belum ada; cek .gitignore & file terlacak (183 file)
+- Keamanan: .env sebelumnya ikut terlacak → git rm --cached; buat .env.example portabel (DATABASE_URL="file:../db/custom.db" relatif ke prisma/schema.prisma)
+- Verifikasi tidak ada token/rahasia di file terlacak; auth.ts aman (fallback ADMIN_TOKEN_SECRET)
+- Remote ditambahkan dengan token user (tersimpan di .git/config), push -u origin main sukses
+- Verifikasi: SHA lokal == remote (db4d255), 4 commit naik, 234 entri tree di GitHub; repo public & sebelumnya kosong
+
+Stage Summary:
+- ✅ https://github.com/akmalrizpa/dasboard-concept berisi webstore lengkap + db/custom.db ter-seed + semua source
+- ⚠️ Catatan user: token pernah dibagikan di chat (sebaiknya regenerate di GitHub); ganti password admin (admin/admin123) sebelum dipakai produksi
