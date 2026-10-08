@@ -11,12 +11,16 @@ import AdminProductsView from './AdminProductsView'
 import AdminOrdersView from './AdminOrdersView'
 import AdminCustomersView from './AdminCustomersView'
 import AdminCategoriesView from './AdminCategoriesView'
+import AdminVouchersView from './AdminVouchersView'
+import AdminSettingsView from './AdminSettingsView'
 import {
   LayoutDashboard,
   Package,
   ShoppingCart,
   Users,
   FolderTree,
+  TicketPercent,
+  Settings,
   Store,
   LogOut,
   Sparkles,
@@ -29,6 +33,8 @@ const MENU: { view: View['name']; label: string; icon: typeof LayoutDashboard }[
   { view: 'admin-orders', label: 'Pesanan', icon: ShoppingCart },
   { view: 'admin-customers', label: 'Pelanggan', icon: Users },
   { view: 'admin-categories', label: 'Kategori & Brand', icon: FolderTree },
+  { view: 'admin-vouchers', label: 'Voucher & Promo', icon: TicketPercent },
+  { view: 'admin-settings', label: 'Pengaturan', icon: Settings },
 ]
 
 export default function AdminShell() {
@@ -174,6 +180,8 @@ export default function AdminShell() {
           {currentView === 'admin-orders' && <AdminOrdersView />}
           {currentView === 'admin-customers' && <AdminCustomersView />}
           {currentView === 'admin-categories' && <AdminCategoriesView />}
+          {currentView === 'admin-vouchers' && <AdminVouchersView />}
+          {currentView === 'admin-settings' && <AdminSettingsView />}
         </main>
       </div>
     </div>

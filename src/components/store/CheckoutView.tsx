@@ -1,7 +1,6 @@
- 
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -9,53 +8,35 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ChevronLeft, CreditCard, Wallet, Truck, Store, Loader2 } from 'lucide-react'
+import {
+  ChevronLeft,
+  CreditCard,
+  Wallet,
+  Truck,
+  Store,
+  Loader2,
+  TicketPercent,
+  X,
+  CheckCircle2,
+  Tag,
+} from 'lucide-react'
 import { useAppStore } from '@/store/useAppStore'
 import { useCartStore } from '@/store/useCartStore'
 import { formatIDR } from '@/lib/format'
 import { cn } from '@/lib/utils'
+import type { CheckoutConfig, VoucherValidation, VoucherPublic } from '@/lib/types'
 
-const FREE_SHIPPING_THRESHOLD = 300000
-
-const SHIPPING_METHODS = [
-  { id: 'REGULER', label: 'Reguler', eta: '2-4 hari kerja', cost: 15000 },
-  { id: 'KARGO', label: 'Kargo Hemat', eta: '4-7 hari kerja', cost: 9000 },
-  { id: 'INSTAN', label: 'Instan', eta: 'Hari ini', cost: 25000 },
-]
-
-const PAYMENT_GROUPS = [
-  {
-    label: 'Transfer Bank',
-    icon: CreditCard,
-    methods: [
-      { id: 'BCA', label: 'BCA', desc: 'Virtual Account otomatis' },
-      { id: 'MANDIRI', label: 'Mandiri', desc: 'Virtual Account otomatis' },
-      { id: 'BNI', label: 'BNI', desc: 'Virtual Account otomatis' },
-    ],
-  },
-  {
-    label: 'E-Wallet',
-    icon: Wallet,
-    methods: [
-      { id: 'GOPAY', label: 'GoPay', desc: 'Bayar dengan saldo Gojek' },
-      { id: 'OVO', label: 'OVO', desc: 'Bayar dengan saldo OVO' },
-      { id: 'DANA', label: 'DANA', desc: 'Bayar dengan saldo DANA' },
-    ],
-  },
-  {
-    label: 'Lainnya',
-    icon: Store,
-    methods: [
-      { id: 'QRIS', label: 'QRIS', desc: 'Scan QR semua aplikasi' },
-      { id: 'COD', label: 'COD', desc: 'Bayar saat paket tiba (+Rp2.500)' },
-    ],
-  },
-]
+const GROUP_ICONS: Record<string, typeof CreditCard> = {
+  'Transfer Bank': CreditCard,
+  'E-Wallet': Wallet,
+  Lainnya: Store,
+}
 
 export default function CheckoutView() {
   const navigate = useAppStore((s) => s.navigate)
   const { items, clearCart } = useCartStore()
 
+  const [config, setConfig] = useState<CheckoutConfig | null>(null)
   const [form, setForm] = useState({
     customerName: '',
     email: '',
@@ -65,17 +46,86 @@ export default function CheckoutView() {
     postalCode: '',
     notes: '',
   })
-  const [shippingMethod, setShippingMethod] = useState('REGULER')
-  const [paymentMethod, setPaymentMethod] = useState('BCA')
+  const [shippingMethod, setShippingMethod] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState('')
+  const [voucherCode, setVoucherCode] = useState('')
+  const [appliedVoucher, setAppliedVoucher] = useState<VoucherValidation | null>(null)
+  const [voucherError, setVoucherError] = useState('')
+  const [voucherChecking, setVoucherChecking] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
+  // ===== Muat konfigurasi dinamis (ongkir, pembayaran, voucher) dari server =====
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/checkout/config')
+      .then(async (res) => {
+        if (!res.ok) throw new Error('Gagal memuat konfigurasi')
+        return res.json()
+      })
+      .then((data: CheckoutConfig) => {
+        if (cancelled) return
+        setConfig(data)
+        if (data.shippingMethods.length > 0) setShippingMethod((m) => m || data.shippingMethods[0].code)
+        if (data.paymentMethods.length > 0) setPaymentMethod((m) => m || data.paymentMethods[0].code)
+      })
+      .catch((e) => console.error(e))
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0)
-  const selectedShipping = SHIPPING_METHODS.find((s) => s.id === shippingMethod)!
-  const freeShipping = subtotal >= FREE_SHIPPING_THRESHOLD
-  const codFee = paymentMethod === 'COD' ? 2500 : 0
-  const shippingCost = freeShipping ? 0 : selectedShipping.cost
-  const total = subtotal + shippingCost + codFee
+  const selectedShipping = config?.shippingMethods.find((s) => s.code === shippingMethod)
+  const selectedPayment = config?.paymentMethods.find((p) => p.code === paymentMethod)
+  const freeThreshold = config?.freeShippingThreshold ?? 0
+  const freeShipping = freeThreshold > 0 && subtotal >= freeThreshold
+  const voucherFreeShipping = appliedVoucher?.valid && appliedVoucher.freeShipping
+  const discount = appliedVoucher?.valid ? appliedVoucher.discount : 0
+  const shippingCost = freeShipping || voucherFreeShipping ? 0 : selectedShipping?.cost ?? 0
+  const paymentFee = selectedPayment?.fee || 0
+  const total = Math.max(0, subtotal - discount) + shippingCost + paymentFee
+
+  // Grup pembayaran berdasarkan kolom `group` di database
+  const paymentGroups = useMemo(() => {
+    if (!config) return []
+    const groups: { label: string; methods: typeof config.paymentMethods }[] = []
+    for (const method of config.paymentMethods) {
+      const existing = groups.find((g) => g.label === method.group)
+      if (existing) existing.methods.push(method)
+      else groups.push({ label: method.group, methods: [method] })
+    }
+    return groups
+  }, [config])
+
+  const applyVoucher = async (code?: string) => {
+    const toApply = (code ?? voucherCode).trim().toUpperCase()
+    if (!toApply) {
+      setVoucherError('Masukkan kode voucher dulu')
+      return
+    }
+    setVoucherChecking(true)
+    setVoucherError('')
+    try {
+      const res = await fetch('/api/vouchers/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: toApply, subtotal, shippingCost: selectedShipping?.cost ?? 0 }),
+      })
+      const data = (await res.json()) as VoucherValidation
+      if (!res.ok || !data.valid) {
+        setAppliedVoucher(null)
+        setVoucherError(data.error || 'Voucher tidak valid')
+      } else {
+        setAppliedVoucher(data)
+        setVoucherCode(toApply)
+      }
+    } catch {
+      setVoucherError('Gagal memeriksa voucher. Coba lagi.')
+    } finally {
+      setVoucherChecking(false)
+    }
+  }
 
   const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [key]: e.target.value }))
@@ -96,6 +146,10 @@ export default function CheckoutView() {
       setError('Alamat, kota, dan kode pos wajib diisi.')
       return
     }
+    if (!shippingMethod || !paymentMethod) {
+      setError('Pilih metode pengiriman dan pembayaran.')
+      return
+    }
 
     setSubmitting(true)
     try {
@@ -106,6 +160,7 @@ export default function CheckoutView() {
           ...form,
           shippingMethod,
           paymentMethod,
+          voucherCode: appliedVoucher?.valid ? appliedVoucher.voucher?.code : undefined,
           items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
         }),
       })
@@ -144,6 +199,23 @@ export default function CheckoutView() {
   }
 
   const inputCls = 'h-11'
+
+  // Skeleton saat konfigurasi belum termuat
+  if (!config) {
+    return (
+      <main className="container mx-auto px-4 py-6">
+        <Skeleton className="mb-6 h-10 w-48" />
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="space-y-6 lg:col-span-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-48 w-full rounded-xl" />
+            ))}
+          </div>
+          <Skeleton className="h-96 w-full rounded-xl" />
+        </div>
+      </main>
+    )
+  }
 
   return (
     <main className="container mx-auto px-4 py-6 animate-fade-in-up">
@@ -208,7 +280,7 @@ export default function CheckoutView() {
             </CardContent>
           </Card>
 
-          {/* Pengiriman */}
+          {/* Pengiriman — metode & tarif dari database */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base">
@@ -218,22 +290,22 @@ export default function CheckoutView() {
             </CardHeader>
             <CardContent>
               <RadioGroup value={shippingMethod} onValueChange={setShippingMethod} className="grid gap-3 sm:grid-cols-3">
-                {SHIPPING_METHODS.map((method) => (
+                {config.shippingMethods.map((method) => (
                   <label
-                    key={method.id}
+                    key={method.code}
                     className={cn(
                       'flex cursor-pointer items-start gap-3 rounded-xl border p-3.5 transition-all',
-                      shippingMethod === method.id ? 'border-primary bg-secondary/50 ring-1 ring-primary' : 'hover:border-neutral-300'
+                      shippingMethod === method.code ? 'border-primary bg-secondary/50 ring-1 ring-primary' : 'hover:border-neutral-300'
                     )}
                   >
-                    <RadioGroupItem value={method.id} className="mt-0.5" />
+                    <RadioGroupItem value={method.code} className="mt-0.5" />
                     <div className="flex-1">
                       <div className="flex items-center gap-1.5 text-sm font-semibold">
                         <Truck className="h-4 w-4 text-primary" /> {method.label}
                       </div>
                       <p className="mt-0.5 text-xs text-muted-foreground">{method.eta}</p>
                       <p className="mt-1 text-sm font-bold">
-                        {freeShipping ? (
+                        {freeShipping || voucherFreeShipping ? (
                           <span className="text-emerald-600">GRATIS</span>
                         ) : (
                           formatIDR(method.cost)
@@ -245,13 +317,13 @@ export default function CheckoutView() {
               </RadioGroup>
               {freeShipping && (
                 <p className="mt-3 rounded-lg bg-emerald-50 p-2.5 text-xs font-semibold text-emerald-700">
-                  🎉 Selamat! Kamu mendapatkan gratis ongkir karena belanja di atas {formatIDR(FREE_SHIPPING_THRESHOLD)}
+                  🎉 Selamat! Kamu mendapatkan gratis ongkir karena belanja di atas {formatIDR(freeThreshold)}
                 </p>
               )}
             </CardContent>
           </Card>
 
-          {/* Pembayaran */}
+          {/* Pembayaran — metode dari database */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base">
@@ -260,37 +332,147 @@ export default function CheckoutView() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {PAYMENT_GROUPS.map((group) => (
-                <div key={group.label}>
-                  <p className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                    {group.label}
-                  </p>
-                  <div className="grid gap-2.5 sm:grid-cols-3">
-                    {group.methods.map((method) => (
-                      <label
-                        key={method.id}
+              {paymentGroups.map((group) => {
+                const GroupIcon = GROUP_ICONS[group.label] || Store
+                return (
+                  <div key={group.label}>
+                    <p className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                      <GroupIcon className="h-3.5 w-3.5" /> {group.label}
+                    </p>
+                    <div className="grid gap-2.5 sm:grid-cols-3">
+                      {group.methods.map((method) => (
+                        <label
+                          key={method.code}
+                          className={cn(
+                            'flex cursor-pointer items-center gap-2.5 rounded-xl border p-3 transition-all',
+                            paymentMethod === method.code ? 'border-primary bg-secondary/50 ring-1 ring-primary' : 'hover:border-neutral-300'
+                          )}
+                        >
+                          <input
+                            type="radio"
+                            name="payment"
+                            value={method.code}
+                            checked={paymentMethod === method.code}
+                            onChange={() => setPaymentMethod(method.code)}
+                            className="h-4 w-4 accent-[oklch(0.62_0.23_357)]"
+                          />
+                          <div>
+                            <p className="text-sm font-semibold">{method.label}</p>
+                            <p className="text-[11px] text-muted-foreground">
+                              {method.desc}
+                              {method.fee > 0 && ` (+${formatIDR(method.fee)})`}
+                            </p>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+            </CardContent>
+          </Card>
+
+          {/* Voucher — kode promo dari database */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <TicketPercent className="h-4.5 w-4.5 text-primary" />
+                Voucher Diskon
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {appliedVoucher?.valid ? (
+                <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 p-3">
+                  <div className="flex items-center gap-2.5">
+                    <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                    <div>
+                      <p className="text-sm font-bold text-emerald-800">
+                        {appliedVoucher.voucher?.code} aktif!
+                      </p>
+                      <p className="text-xs text-emerald-700">
+                        {appliedVoucher.freeShipping
+                          ? 'Gratis ongkir diterapkan'
+                          : `Hemat ${formatIDR(appliedVoucher.discount)}`}
+                        {' — '}{appliedVoucher.voucher?.description}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      setAppliedVoucher(null)
+                      setVoucherCode('')
+                    }}
+                    aria-label="Hapus voucher"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Tag className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      value={voucherCode}
+                      onChange={(e) => {
+                        setVoucherCode(e.target.value.toUpperCase())
+                        setVoucherError('')
+                      }}
+                      placeholder="Masukkan kode voucher"
+                      className="h-11 pl-9 font-mono uppercase tracking-wide"
+                      aria-label="Kode voucher"
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={() => applyVoucher()}
+                    disabled={voucherChecking || !voucherCode.trim()}
+                    className="h-11 gap-1.5"
+                  >
+                    {voucherChecking ? <Loader2 className="h-4 w-4 animate-spin" /> : <TicketPercent className="h-4 w-4" />}
+                    Pakai
+                  </Button>
+                </div>
+              )}
+              {voucherError && (
+                <p className="text-xs font-semibold text-rose-600" role="alert">
+                  {voucherError}
+                </p>
+              )}
+
+              {/* Daftar voucher aktif (dari database) */}
+              {config.vouchers.length > 0 && !appliedVoucher?.valid && (
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold text-muted-foreground">Voucher tersedia:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {config.vouchers.map((v: VoucherPublic) => (
+                      <button
+                        key={v.code}
+                        type="button"
+                        onClick={() => {
+                          setVoucherCode(v.code)
+                          applyVoucher(v.code)
+                        }}
+                        disabled={voucherChecking || subtotal < v.minPurchase}
                         className={cn(
-                          'flex cursor-pointer items-center gap-2.5 rounded-xl border p-3 transition-all',
-                          paymentMethod === method.id ? 'border-primary bg-secondary/50 ring-1 ring-primary' : 'hover:border-neutral-300'
+                          'flex items-center gap-1.5 rounded-lg border border-dashed border-primary/40 bg-secondary/50 px-3 py-1.5 text-left text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-50'
                         )}
+                        title={subtotal < v.minPurchase ? `Min. belanja ${formatIDR(v.minPurchase)}` : v.description}
                       >
-                        <input
-                          type="radio"
-                          name="payment"
-                          value={method.id}
-                          checked={paymentMethod === method.id}
-                          onChange={() => setPaymentMethod(method.id)}
-                          className="h-4 w-4 accent-[oklch(0.62_0.23_357)]"
-                        />
-                        <div>
-                          <p className="text-sm font-semibold">{method.label}</p>
-                          <p className="text-[11px] text-muted-foreground">{method.desc}</p>
-                        </div>
-                      </label>
+                        <TicketPercent className="h-3.5 w-3.5" />
+                        {v.code}
+                        <span className="font-normal opacity-80">
+                          {v.type === 'PERCENT' && `${v.value}%${v.maxDiscount > 0 ? ` max ${formatIDR(v.maxDiscount)}` : ''}`}
+                          {v.type === 'FIXED' && formatIDR(v.value)}
+                          {v.type === 'FREE_SHIPPING' && 'Gratis Ongkir'}
+                        </span>
+                      </button>
                     ))}
                   </div>
                 </div>
-              ))}
+              )}
             </CardContent>
           </Card>
         </div>
@@ -322,16 +504,24 @@ export default function CheckoutView() {
                   <span className="text-muted-foreground">Subtotal</span>
                   <span className="font-semibold">{formatIDR(subtotal)}</span>
                 </div>
+                {discount > 0 && (
+                  <div className="flex justify-between text-emerald-600">
+                    <span className="flex items-center gap-1">
+                      <TicketPercent className="h-3.5 w-3.5" /> Voucher {appliedVoucher?.voucher?.code}
+                    </span>
+                    <span className="font-semibold">-{formatIDR(discount)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Pengiriman ({selectedShipping.label})</span>
-                  <span className={cn('font-semibold', freeShipping && 'text-emerald-600')}>
-                    {freeShipping ? 'GRATIS' : formatIDR(shippingCost)}
+                  <span className="text-muted-foreground">Pengiriman ({selectedShipping?.label})</span>
+                  <span className={cn('font-semibold', (freeShipping || voucherFreeShipping) && 'text-emerald-600')}>
+                    {freeShipping || voucherFreeShipping ? 'GRATIS' : formatIDR(shippingCost)}
                   </span>
                 </div>
-                {codFee > 0 && (
+                {paymentFee > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Biaya COD</span>
-                    <span className="font-semibold">{formatIDR(codFee)}</span>
+                    <span className="text-muted-foreground">Biaya {selectedPayment?.label}</span>
+                    <span className="font-semibold">{formatIDR(paymentFee)}</span>
                   </div>
                 )}
                 <div className="flex justify-between border-t pt-2">

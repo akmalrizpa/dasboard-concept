@@ -4,20 +4,22 @@
 import { useEffect, useMemo, useState } from 'react'
 import ProductCard from './ProductCard'
 import { useAppStore } from '@/store/useAppStore'
+import { useSiteStore, getSetting } from '@/store/useSiteStore'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ChevronLeft, ChevronRight, Zap, ArrowRight, Timer } from 'lucide-react'
 import type { HomeData, Product } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
-/** Countdown flash sale berakhir pada tengah malam */
-function useFlashCountdown() {
+/** Countdown flash sale — mengikuti waktu selesai yang diatur admin */
+function useFlashCountdown(endIso?: string | null) {
   const [remaining, setRemaining] = useState({ h: 0, m: 0, s: 0 })
   useEffect(() => {
     const tick = () => {
+      // Fallback: tengah malam ini jika jendela tidak tersedia
       const now = new Date()
-      const end = new Date(now)
-      end.setHours(23, 59, 59, 999)
+      const end = endIso ? new Date(endIso) : new Date(now)
+      if (!endIso) end.setHours(23, 59, 59, 999)
       const diff = Math.max(0, end.getTime() - now.getTime())
       setRemaining({
         h: Math.floor(diff / 3600000),
@@ -28,7 +30,7 @@ function useFlashCountdown() {
     tick()
     const id = setInterval(tick, 1000)
     return () => clearInterval(id)
-  }, [])
+  }, [endIso])
   return remaining
 }
 
@@ -69,9 +71,23 @@ function SectionHeader({
 
 export default function HomePage({ data, loading }: { data: HomeData | null; loading: boolean }) {
   const navigate = useAppStore((s) => s.navigate)
-  const countdown = useFlashCountdown()
+  const settings = useSiteStore((s) => s.settings)
+  const flashWindow = useSiteStore((s) => s.flashWindow)
+  const articles = useSiteStore((s) => s.articles)
+  const countdown = useFlashCountdown(flashWindow?.endsAt)
   const [bannerIndex, setBannerIndex] = useState(0)
   const [recommendTab, setRecommendTab] = useState<'bestseller' | 'newest'>('bestseller')
+
+  // ===== Judul section dinamis dari pengaturan =====
+  const categoryTitle = getSetting<string>(settings, 'section.categoryTitle', 'Kategori Populer')
+  const categoryEmoji = getSetting<string>(settings, 'section.categoryEmoji', '🧴')
+  const brandTitle = getSetting<string>(settings, 'section.brandTitle', 'Brand Unggulan')
+  const brandEmoji = getSetting<string>(settings, 'section.brandEmoji', '💎')
+  const recommendTitle = getSetting<string>(settings, 'section.recommendTitle', 'Rekomendasi Untukmu')
+  const recommendEmoji = getSetting<string>(settings, 'section.recommendEmoji', '✨')
+  const journalTitle = getSetting<string>(settings, 'section.journalTitle', 'Beauty Journal')
+  const journalEmoji = getSetting<string>(settings, 'section.journalEmoji', '📖')
+  const flashTitle = flashWindow?.title || 'Flash Sale'
 
   const banners = data?.banners || []
   const recommendProducts: Product[] = useMemo(() => {
@@ -181,8 +197,8 @@ export default function HomePage({ data, loading }: { data: HomeData | null; loa
       )}
 
       {/* Kategori */}
-      <section className="container mx-auto px-4 pt-8" aria-label="Kategori populer">
-        <SectionHeader title="Kategori Populer" emoji="🧴" />
+      <section className="container mx-auto px-4 pt-8" aria-label={categoryTitle}>
+        <SectionHeader title={categoryTitle} emoji={categoryEmoji} />
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
           {data.categories.map((cat) => (
             <button
@@ -211,15 +227,15 @@ export default function HomePage({ data, loading }: { data: HomeData | null; loa
         </div>
       </section>
 
-      {/* Flash sale */}
-      {data.flashSale.length > 0 && (
-        <section className="mt-10 bg-gradient-to-r from-primary/10 via-rose-50 to-primary/10 py-8" aria-label="Flash sale">
+      {/* Flash sale — tampil hanya jika jendela aktif & ada produk */}
+      {flashWindow && data.flashSale.length > 0 && (
+        <section className="mt-10 bg-gradient-to-r from-primary/10 via-rose-50 to-primary/10 py-8" aria-label={flashTitle}>
           <div className="container mx-auto px-4">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <h2 className="flex items-center gap-2 text-lg font-bold md:text-2xl">
                   <Zap className="h-6 w-6 fill-amber-400 text-amber-400" aria-hidden />
-                  Flash Sale
+                  {flashTitle}
                 </h2>
                 <div className="flex items-center gap-1.5 rounded-full bg-neutral-900 px-3 py-1 text-white">
                   <Timer className="h-3.5 w-3.5 animate-pulse-dot" aria-hidden />
@@ -233,7 +249,7 @@ export default function HomePage({ data, loading }: { data: HomeData | null; loa
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => navigate({ name: 'products', flash: true, title: 'Flash Sale' })}
+                onClick={() => navigate({ name: 'products', flash: true, title: flashTitle })}
                 className="gap-1 rounded-full border-primary/30 text-primary hover:bg-primary hover:text-white"
               >
                 Lihat Semua <ArrowRight className="h-4 w-4" />
@@ -268,8 +284,8 @@ export default function HomePage({ data, loading }: { data: HomeData | null; loa
 
       {/* Brand unggulan */}
       {data.brands.length > 0 && (
-        <section className="container mx-auto px-4 pt-10" aria-label="Brand unggulan">
-          <SectionHeader title="Brand Unggulan" emoji="💎" />
+        <section className="container mx-auto px-4 pt-10" aria-label={brandTitle}>
+          <SectionHeader title={brandTitle} emoji={brandEmoji} />
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6">
             {data.brands.map((brand) => (
               <button
@@ -290,9 +306,9 @@ export default function HomePage({ data, loading }: { data: HomeData | null; loa
       )}
 
       {/* Rekomendasi */}
-      <section className="container mx-auto px-4 py-10" aria-label="Rekomendasi produk">
+      <section className="container mx-auto px-4 py-10" aria-label={recommendTitle}>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-bold md:text-2xl">✨ Rekomendasi Untukmu</h2>
+          <h2 className="text-lg font-bold md:text-2xl">{recommendEmoji} {recommendTitle}</h2>
           <div className="flex rounded-full bg-neutral-100 p-1">
             <button
               onClick={() => setRecommendTab('bestseller')}
@@ -329,48 +345,31 @@ export default function HomePage({ data, loading }: { data: HomeData | null; loa
         </div>
       </section>
 
-      {/* Beauty journal */}
-      <section className="border-t border-neutral-100 bg-secondary/30 py-10" aria-label="Beauty journal">
-        <div className="container mx-auto px-4">
-          <SectionHeader title="Beauty Journal" emoji="📖" />
-          <div className="grid gap-4 md:grid-cols-3">
-            {[
-              {
-                emoji: '🌅',
-                tag: 'Skincare 101',
-                title: 'Urutan Skincare Pagi yang Benar untuk Pemula',
-                desc: 'Kenali langkah skincare pagi dari cleanser hingga sunscreen agar kulit terlindungi optimal sepanjang hari.',
-              },
-              {
-                emoji: '🧪',
-                tag: 'Review',
-                title: '5 Serum Niacinamide Lokal yang Terbukti Ampuh',
-                desc: 'Kulit kusam dan berminyak? Niacinamide jawabannya. Ini rekomendasi serum lokal dengan kualitas internasional.',
-              },
-              {
-                emoji: '💄',
-                tag: 'Tutorial',
-                title: 'Makeup Natural untuk Aktivitas Sehari-hari',
-                desc: 'Tampil segar hanya dengan 5 langkah makeup natural yang tahan seharian — cocok untuk kantoran dan kuliah.',
-              },
-            ].map((article) => (
-              <article
-                key={article.title}
-                className="cursor-pointer rounded-xl border border-neutral-100 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
-              >
-                <span className="text-3xl" aria-hidden>
-                  {article.emoji}
-                </span>
-                <p className="mt-3 text-xs font-bold uppercase tracking-wide text-primary">
-                  {article.tag}
-                </p>
-                <h3 className="mt-1 line-clamp-2 font-bold leading-snug">{article.title}</h3>
-                <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{article.desc}</p>
-              </article>
-            ))}
+      {/* Beauty journal — artikel dari pengaturan admin */}
+      {articles.length > 0 && (
+        <section className="border-t border-neutral-100 bg-secondary/30 py-10" aria-label={journalTitle}>
+          <div className="container mx-auto px-4">
+            <SectionHeader title={journalTitle} emoji={journalEmoji} />
+            <div className="grid gap-4 md:grid-cols-3">
+              {articles.map((article) => (
+                <article
+                  key={article.id}
+                  className="cursor-pointer rounded-xl border border-neutral-100 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+                >
+                  <span className="text-3xl" aria-hidden>
+                    {article.emoji}
+                  </span>
+                  <p className="mt-3 text-xs font-bold uppercase tracking-wide text-primary">
+                    {article.tag}
+                  </p>
+                  <h3 className="mt-1 line-clamp-2 font-bold leading-snug">{article.title}</h3>
+                  <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{article.excerpt}</p>
+                </article>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </main>
   )
 }

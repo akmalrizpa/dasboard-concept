@@ -65,6 +65,28 @@ export interface Banner {
   sortOrder: number
 }
 
+/** Artikel Beauty Journal (dinamis) */
+export interface Article {
+  id: string
+  emoji: string
+  tag: string
+  title: string
+  excerpt: string
+  isActive: boolean
+  sortOrder: number
+}
+
+/** Jendela flash sale aktif (dinamis) */
+export interface FlashWindow {
+  id: string
+  title: string
+  startsAt: string
+  endsAt: string
+}
+
+/** Pengaturan toko (key-value, ter-parse) */
+export type SettingsMap = Record<string, unknown>
+
 export interface HomeData {
   banners: Banner[]
   categories: Category[]
@@ -72,6 +94,87 @@ export interface HomeData {
   flashSale: Product[]
   bestSellers: Product[]
   newest: Product[]
+  settings: SettingsMap
+  flashWindow: FlashWindow | null
+  articles: Article[]
+}
+
+/** Metode pengiriman dinamis */
+export interface ShippingMethodDto {
+  id: string
+  code: string
+  label: string
+  eta: string
+  cost: number
+  isActive: boolean
+  sortOrder: number
+}
+
+/** Metode pembayaran dinamis */
+export interface PaymentMethodDto {
+  id: string
+  code: string
+  label: string
+  group: string
+  desc: string
+  fee: number
+  isActive: boolean
+  sortOrder: number
+}
+
+/** Info voucher publik (tanpa data sensitif) */
+export interface VoucherPublic {
+  code: string
+  description: string
+  type: 'PERCENT' | 'FIXED' | 'FREE_SHIPPING'
+  value: number
+  minPurchase: number
+  maxDiscount: number
+}
+
+/** Konfigurasi checkout dari server */
+export interface CheckoutConfig {
+  shippingMethods: ShippingMethodDto[]
+  paymentMethods: PaymentMethodDto[]
+  vouchers: VoucherPublic[]
+  freeShippingThreshold: number
+  codFee: number
+}
+
+/** Hasil validasi voucher */
+export interface VoucherValidation {
+  valid: boolean
+  discount: number
+  freeShipping: boolean
+  voucher?: VoucherPublic
+  error?: string
+}
+
+/** Voucher lengkap (admin) */
+export interface VoucherFull {
+  id: string
+  code: string
+  description: string
+  type: 'PERCENT' | 'FIXED' | 'FREE_SHIPPING'
+  value: number
+  minPurchase: number
+  maxDiscount: number
+  usageLimit: number
+  usedCount: number
+  startsAt: string
+  expiresAt: string
+  isActive: boolean
+  createdAt: string
+}
+
+/** Jendela flash sale lengkap (admin) */
+export interface FlashSaleFull {
+  id: string
+  title: string
+  startsAt: string
+  endsAt: string
+  isActive: boolean
+  createdAt: string
 }
 
 export interface OrderItem {
@@ -96,6 +199,7 @@ export interface Order {
   subtotal: number
   shippingCost: number
   discount?: number
+  voucherCode?: string | null
   total: number
   paymentMethod: string
   status: string

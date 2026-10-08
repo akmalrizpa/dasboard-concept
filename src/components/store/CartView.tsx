@@ -1,24 +1,47 @@
  
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Trash2, Minus, Plus, ShoppingCart, ArrowRight, Tag } from 'lucide-react'
+import { Trash2, Minus, Plus, ShoppingCart, ArrowRight, Tag, TicketPercent } from 'lucide-react'
 import { useAppStore } from '@/store/useAppStore'
 import { useCartStore } from '@/store/useCartStore'
+import { useSiteStore, getSetting } from '@/store/useSiteStore'
 import { formatIDR } from '@/lib/format'
 import Link from 'next/link'
-
-const FREE_SHIPPING_THRESHOLD = 300000
+import type { CheckoutConfig } from '@/lib/types'
 
 export default function CartView() {
   const navigate = useAppStore((s) => s.navigate)
+  const settings = useSiteStore((s) => s.settings)
   const { items, removeItem, updateQuantity, clearCart } = useCartStore()
   const [clearConfirm, setClearConfirm] = useState(false)
+  const [config, setConfig] = useState<CheckoutConfig | null>(null)
+
+  // Ambil konfigurasi ongkir & voucher dari server (dinamis)
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/checkout/config')
+      .then(async (res) => {
+        if (!res.ok) throw new Error('Gagal memuat konfigurasi')
+        return res.json()
+      })
+      .then((data: CheckoutConfig) => {
+        if (!cancelled) setConfig(data)
+      })
+      .catch((e) => console.error(e))
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  // Batas gratis ongkir dinamis dari pengaturan
+  const FREE_SHIPPING_THRESHOLD = getSetting<number>(settings, 'shipping.freeThreshold', 0)
+  const minShippingCost = config ? Math.min(...config.shippingMethods.map((m) => m.cost)) : null
 
   const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0)
-  const freeShipping = subtotal >= FREE_SHIPPING_THRESHOLD
+  const freeShipping = FREE_SHIPPING_THRESHOLD > 0 && subtotal >= FREE_SHIPPING_THRESHOLD
   const totalItems = items.reduce((s, i) => s + i.quantity, 0)
 
   if (items.length === 0) {
@@ -167,11 +190,15 @@ export default function CartView() {
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Pengiriman</span>
                 <span className={freeShipping ? 'font-semibold text-emerald-600' : 'font-semibold'}>
-                  {freeShipping ? 'GRATIS' : 'Mulai Rp9.000'}
+                  {freeShipping
+                    ? 'GRATIS'
+                    : minShippingCost !== null
+                      ? `Mulai ${formatIDR(minShippingCost)}`
+                      : 'Dihitung saat checkout'}
                 </span>
               </div>
 
-              {!freeShipping && (
+              {!freeShipping && FREE_SHIPPING_THRESHOLD > 0 && (
                 <div className="rounded-lg bg-secondary p-3 text-xs">
                   <p className="flex items-center gap-1.5 font-semibold text-primary">
                     <Tag className="h-3.5 w-3.5" /> Tips hemat ongkir
@@ -185,6 +212,24 @@ export default function CartView() {
                       style={{ width: `${Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD) * 100)}%` }}
                     />
                   </div>
+                </div>
+              )}
+
+              {/* Info voucher aktif dari database */}
+              {config && config.vouchers.length > 0 && (
+                <div className="rounded-lg border border-dashed border-primary/40 bg-secondary/40 p-3 text-xs">
+                  <p className="flex items-center gap-1.5 font-semibold text-primary">
+                    <TicketPercent className="h-3.5 w-3.5" /> Voucher tersedia
+                  </p>
+                  <ul className="mt-1.5 space-y-1 text-muted-foreground">
+                    {config.vouchers.slice(0, 3).map((v) => (
+                      <li key={v.code} className="flex items-center gap-1.5">
+                        <span className="font-mono font-bold text-primary">{v.code}</span>
+                        <span className="truncate">— {v.description}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-1.5 text-[10px] text-muted-foreground">Pakai voucher saat checkout ya!</p>
                 </div>
               )}
 

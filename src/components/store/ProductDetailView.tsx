@@ -21,10 +21,11 @@ import {
 } from 'lucide-react'
 import { useAppStore } from '@/store/useAppStore'
 import { useCartStore } from '@/store/useCartStore'
+import { useSiteStore, getSetting } from '@/store/useSiteStore'
 import { formatIDR, formatDateID, discountPercent } from '@/lib/format'
 import { useToast } from '@/hooks/use-toast'
 import ProductCard from './ProductCard'
-import type { ProductWithReviews, Product } from '@/lib/types'
+import type { ProductWithReviews, Product, CheckoutConfig } from '@/lib/types'
 
 function StarRating({ rating, size = 'h-4 w-4' }: { rating: number; size?: string }) {
   return (
@@ -43,6 +44,31 @@ function StarRating({ rating, size = 'h-4 w-4' }: { rating: number; size?: strin
 export default function ProductDetailView({ slug }: { slug: string }) {
   const navigate = useAppStore((s) => s.navigate)
   const addItem = useCartStore((s) => s.addItem)
+  const settings = useSiteStore((s) => s.settings)
+  const [shipConfig, setShipConfig] = useState<CheckoutConfig | null>(null)
+
+  // Ambil opsi pengiriman dinamis dari server
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/checkout/config')
+      .then(async (res) => {
+        if (!res.ok) throw new Error('Gagal memuat konfigurasi')
+        return res.json()
+      })
+      .then((data: CheckoutConfig) => {
+        if (!cancelled) setShipConfig(data)
+      })
+      .catch((e) => console.error(e))
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  // Teks dinamis dari pengaturan
+  const siteName = getSetting<string>(settings, 'site.name', 'BeautyLoka')
+  const guaranteeTitle = getSetting<string>(settings, 'product.guaranteeTitle', `Jaminan ${siteName}`)
+  const guaranteeTexts = getSetting<string[]>(settings, 'product.guaranteeTexts', [])
+  const freeThreshold = getSetting<number>(settings, 'shipping.freeThreshold', 0)
   const { toast } = useToast()
 
   const [product, setProduct] = useState<ProductWithReviews | null>(null)
@@ -355,7 +381,7 @@ export default function ProductDetailView({ slug }: { slug: string }) {
                 <AccordionTrigger className="text-sm font-semibold">Informasi Varian</AccordionTrigger>
                 <AccordionContent className="text-sm leading-relaxed text-neutral-600">
                   Kategori: {product.category.name} • Brand: {product.brand.name} • Produk ini
-                  100% original dan didistribusikan resmi di BeautyLoka. Segel dan batch code
+                  100% original dan didistribusikan resmi di {siteName}. Segel dan batch code
                   terjamin keasliannya.
                 </AccordionContent>
               </AccordionItem>
@@ -426,21 +452,25 @@ export default function ProductDetailView({ slug }: { slug: string }) {
                   <Truck className="h-4 w-4 text-primary" /> Opsi Pengiriman
                 </div>
                 <ul className="mt-2 space-y-1.5 text-sm text-neutral-600">
-                  <li>• Reguler (2-4 hari kerja) — Rp15.000</li>
-                  <li>• Kargo Hemat (4-7 hari) — Rp9.000</li>
-                  <li>• Instan Same Day — Rp25.000</li>
-                  <li className="font-semibold text-primary">• GRATIS ongkir min. belanja Rp300.000</li>
+                  {/* Tarif ongkir langsung dari database (dikelola admin) */}
+                  {(shipConfig?.shippingMethods || []).map((m) => (
+                    <li key={m.code}>• {m.label} ({m.eta}) — {formatIDR(m.cost)}</li>
+                  ))}
+                  {freeThreshold > 0 && (
+                    <li className="font-semibold text-primary">
+                      • GRATIS ongkir min. belanja {formatIDR(freeThreshold)}
+                    </li>
+                  )}
                 </ul>
               </div>
               <div className="rounded-xl border p-4">
                 <div className="flex items-center gap-2 font-semibold">
-                  <ShieldCheck className="h-4 w-4 text-primary" /> Jaminan BeautyLoka
+                  <ShieldCheck className="h-4 w-4 text-primary" /> {guaranteeTitle}
                 </div>
                 <ul className="mt-2 space-y-1.5 text-sm text-neutral-600">
-                  <li>• 100% produk original bergaransi</li>
-                  <li>• Garansi uang kembali 30 hari</li>
-                  <li>• Pengemasan berstandar keamanan tinggi</li>
-                  <li>• Asuransi kehilangan barang</li>
+                  {guaranteeTexts.map((text) => (
+                    <li key={text}>• {text}</li>
+                  ))}
                 </ul>
               </div>
             </div>

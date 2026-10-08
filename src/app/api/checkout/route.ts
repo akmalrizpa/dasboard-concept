@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { generateOrderNumber } from '@/lib/format'
+import { getSettings } from '@/lib/settings'
 
 interface CheckoutItem {
   productId: string
@@ -17,10 +18,9 @@ interface CheckoutBody {
   notes?: string
   shippingMethod: string
   paymentMethod: string
+  voucherCode?: string
   items: CheckoutItem[]
 }
-
-const FREE_SHIPPING_THRESHOLD = 300000
 
 export async function POST(req: NextRequest) {
   try {
@@ -40,8 +40,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Format email tidak valid' }, { status: 400 })
     }
 
-    const shippingCosts: Record<string, number> = { REGULER: 15000, KARGO: 9000, INSTAN: 25000 }
-    const shippingCost = shippingCosts[body.shippingMethod] ?? 15000
+    // ===== Ongkir dinamis dari database =====
+    const shipping = await db.shippingMethod.findUnique({ where: { code: body.shippingMethod } })
+    if (!shipping || !shipping.isActive) {
+      return NextResponse.json({ error: 'Metode pengiriman tidak valid' }, { status: 400 })
+    }
+    let shippingCost = shipping.cost
+
+    // ===== Metode pembayaran dinamis =====
+    const payment = await db.paymentMethod.findUnique({ where: { code: body.paymentMethod } })
+    if (!payment || !payment.isActive) {
+      return NextResponse.json({ error: 'Metode pembayaran tidak valid' }, { status: 400 })
+    }
+
+    // ===== Batas gratis ongkir dinamis =====
+    const settings = await getSettings()
+    const freeThreshold = Number(settings['shipping.freeThreshold']) || 0
 
     // Ambil produk & hitung harga di server (jangan percaya harga dari klien)
     const productIds = body.items.map((i) => i.productId)
@@ -75,8 +89,42 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    const finalShipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : shippingCost
-    const total = subtotal + finalShipping
+    // ===== Gratis ongkir jika subtotal melewati batas =====
+    if (freeThreshold > 0 && subtotal >= freeThreshold) shippingCost = 0
+
+    // ===== Validasi & terapkan voucher (dihitung ulang di server) =====
+    let discount = 0
+    let voucherCode: string | null = null
+    let voucherFreeShipping = false
+    const code = body.voucherCode?.trim().toUpperCase()
+    if (code) {
+      const now = new Date()
+      const voucher = await db.voucher.findUnique({ where: { code } })
+      if (
+        voucher &&
+        voucher.isActive &&
+        voucher.startsAt <= now &&
+        voucher.expiresAt >= now &&
+        !(voucher.usageLimit > 0 && voucher.usedCount >= voucher.usageLimit) &&
+        subtotal >= voucher.minPurchase
+      ) {
+        voucherCode = voucher.code
+        if (voucher.type === 'PERCENT') {
+          discount = Math.floor((subtotal * voucher.value) / 100)
+          if (voucher.maxDiscount > 0) discount = Math.min(discount, voucher.maxDiscount)
+        } else if (voucher.type === 'FIXED') {
+          discount = Math.min(voucher.value, subtotal)
+        } else if (voucher.type === 'FREE_SHIPPING') {
+          voucherFreeShipping = true
+        }
+      } else {
+        return NextResponse.json({ error: 'Voucher tidak valid atau tidak memenuhi syarat' }, { status: 400 })
+      }
+    }
+    if (voucherFreeShipping) shippingCost = 0
+
+    const paymentFee = payment.fee || 0
+    const total = Math.max(0, subtotal - discount) + shippingCost + paymentFee
 
     // Upsert customer berdasarkan email
     const customer = await db.customer.upsert({
@@ -110,7 +158,9 @@ export async function POST(req: NextRequest) {
         postalCode: body.postalCode.trim(),
         notes: body.notes?.trim() || null,
         subtotal,
-        shippingCost: finalShipping,
+        shippingCost,
+        discount,
+        voucherCode,
         total,
         paymentMethod: body.paymentMethod,
         status: 'PENDING',
@@ -118,6 +168,14 @@ export async function POST(req: NextRequest) {
       },
       include: { items: true },
     })
+
+    // Tandai pemakaian voucher
+    if (voucherCode) {
+      await db.voucher.update({
+        where: { code: voucherCode },
+        data: { usedCount: { increment: 1 } },
+      })
+    }
 
     // Kurangi stok & tambah sold (flash sale juga)
     for (const item of orderItems) {
@@ -137,6 +195,8 @@ export async function POST(req: NextRequest) {
       orderNumber: order.orderNumber,
       total: order.total,
       paymentMethod: order.paymentMethod,
+      discount: order.discount,
+      voucherCode: order.voucherCode,
     })
   } catch (e) {
     console.error('POST /api/checkout error', e)

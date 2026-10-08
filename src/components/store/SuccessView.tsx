@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { CheckCircle2, Copy, ShoppingBag, Package, CreditCard, Banknote, QrCode, Truck } from 'lucide-react'
 import { useAppStore } from '@/store/useAppStore'
-import { formatIDR, PAYMENT_METHOD_LABELS } from '@/lib/format'
+import { useSiteStore, getSetting } from '@/store/useSiteStore'
+import { formatIDR } from '@/lib/format'
 import { useToast } from '@/hooks/use-toast'
+import type { CheckoutConfig } from '@/lib/types'
 
 export default function SuccessView({
   orderNumber,
@@ -18,24 +20,52 @@ export default function SuccessView({
   paymentMethod: string
 }) {
   const navigate = useAppStore((s) => s.navigate)
+  const settings = useSiteStore((s) => s.settings)
   const { toast } = useToast()
   const [showConfetti, setShowConfetti] = useState(true)
+  const [config, setConfig] = useState<CheckoutConfig | null>(null)
 
   useEffect(() => {
     const t = setTimeout(() => setShowConfetti(false), 2500)
     return () => clearTimeout(t)
   }, [])
 
+  // Ambil konfigurasi pembayaran dinamis (label & grup dari database)
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/checkout/config')
+      .then(async (res) => {
+        if (!res.ok) throw new Error('Gagal memuat konfigurasi')
+        return res.json()
+      })
+      .then((data: CheckoutConfig) => {
+        if (!cancelled) setConfig(data)
+      })
+      .catch((e) => console.error(e))
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  // ===== Konten dinamis dari pengaturan =====
+  const siteName = getSetting<string>(settings, 'site.name', 'BeautyLoka')
+  const bankName = getSetting<string>(settings, 'checkout.bankName', 'BCA')
+  const bankAccount = getSetting<string>(settings, 'checkout.bankAccount', '8808 1234 5678')
+  const bankHolder = getSetting<string>(settings, 'checkout.bankHolder', siteName)
+
+  const method = config?.paymentMethods.find((p) => p.code === paymentMethod)
+  const methodLabel = method?.label || paymentMethod
+  // Grup menentukan jenis instruksi: Transfer Bank → VA, E-Wallet → wallet, Lainnya → COD/generic
+  const methodGroup = method?.group || 'Lainnya'
+  const isVA = methodGroup === 'Transfer Bank'
+  const isEWallet = methodGroup === 'E-Wallet'
+  const isCOD = paymentMethod === 'COD'
+
   const copyOrderNumber = () => {
     navigator.clipboard.writeText(orderNumber).then(() => {
       toast({ title: 'Disalin!', description: `Nomor pesanan ${orderNumber} tersalin ke clipboard` })
     }).catch(() => {})
   }
-
-  const isVA = ['BCA', 'MANDIRI', 'BNI'].includes(paymentMethod)
-  const isEWallet = ['GOPAY', 'OVO', 'DANA'].includes(paymentMethod)
-  const isQRIS = paymentMethod === 'QRIS'
-  const isCOD = paymentMethod === 'COD'
 
   return (
     <main className="container mx-auto max-w-2xl px-4 py-12 text-center animate-fade-in-up">
@@ -63,7 +93,7 @@ export default function SuccessView({
       </div>
       <h1 className="mt-5 text-2xl font-bold md:text-3xl">Pesanan Berhasil Dibuat! 🎊</h1>
       <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-        Terima kasih sudah berbelanja di BeautyLoka. Pesananmu sedang menunggu pembayaran.
+        Terima kasih sudah berbelanja di {siteName}. Pesananmu sedang menunggu pembayaran.
         Kami akan mengirim detail pesanan ke email kamu.
       </p>
 
@@ -84,9 +114,7 @@ export default function SuccessView({
               <CreditCard className="h-8 w-8 text-primary" aria-hidden />
               <div>
                 <p className="text-xs text-muted-foreground">Metode Pembayaran</p>
-                <p className="text-sm font-semibold">
-                  {PAYMENT_METHOD_LABELS[paymentMethod] || paymentMethod}
-                </p>
+                <p className="text-sm font-semibold">{methodLabel}</p>
               </div>
             </div>
             <div className="flex items-center gap-3 rounded-xl border p-3">
@@ -98,7 +126,7 @@ export default function SuccessView({
             </div>
           </div>
 
-          {/* Instruksi pembayaran */}
+          {/* Instruksi pembayaran — rekening dari pengaturan admin */}
           <div className="rounded-xl border border-dashed p-4">
             <p className="flex items-center gap-2 text-sm font-bold">
               <QrCode className="h-4 w-4 text-primary" /> Instruksi Pembayaran
@@ -107,7 +135,7 @@ export default function SuccessView({
               <div className="mt-2 space-y-1 text-sm text-neutral-600">
                 <p>
                   1. Transfer <strong>{formatIDR(total)}</strong> ke Virtual Account{' '}
-                  <strong>{paymentMethod} 8808 1234 5678</strong> (a/n BeautyLoka)
+                  <strong>{bankName} {bankAccount}</strong> (a/n {bankHolder})
                 </p>
                 <p>2. Pembayaran diverifikasi otomatis dalam 5 menit setelah transfer</p>
                 <p>3. Status pesanan akan berubah menjadi &quot;Pembayaran Diterima&quot;</p>
@@ -115,16 +143,16 @@ export default function SuccessView({
             )}
             {isEWallet && (
               <div className="mt-2 space-y-1 text-sm text-neutral-600">
-                <p>1. Buka aplikasi {paymentMethod} di HP kamu</p>
+                <p>1. Buka aplikasi {methodLabel} di HP kamu</p>
                 <p>2. Scan QR atau approve push notification pembayaran sebesar {formatIDR(total)}</p>
                 <p>3. Pesanan otomatis terkonfirmasi setelah pembayaran berhasil</p>
               </div>
             )}
-            {isQRIS && (
+            {!isVA && !isEWallet && !isCOD && (
               <div className="mt-2 space-y-1 text-sm text-neutral-600">
-                <p>1. Buka aplikasi e-wallet atau mobile banking apa pun</p>
-                <p>2. Scan QRIS di halaman pembayaran dan bayar {formatIDR(total)}</p>
-                <p>3. Konfirmasi otomatis dalam 1x24 jam</p>
+                <p>1. Selesaikan pembayaran sebesar <strong>{formatIDR(total)}</strong> via {methodLabel}</p>
+                <p>2. Ikuti instruksi pada aplikasi yang kamu gunakan</p>
+                <p>3. Pesanan otomatis terkonfirmasi setelah pembayaran berhasil</p>
               </div>
             )}
             {isCOD && (

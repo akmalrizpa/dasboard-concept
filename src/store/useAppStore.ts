@@ -17,6 +17,8 @@ export type View =
   | { name: 'admin-orders' }
   | { name: 'admin-customers' }
   | { name: 'admin-categories' }
+  | { name: 'admin-vouchers' }
+  | { name: 'admin-settings' }
 
 interface AppState {
   view: View

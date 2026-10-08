@@ -332,6 +332,14 @@ export default function AdminOrdersView() {
                       <span>Subtotal</span>
                       <span>{formatIDR(detailOrder.subtotal)}</span>
                     </div>
+                    {detailOrder.discount > 0 && (
+                      <div className="flex justify-between text-emerald-600">
+                        <span>
+                          Diskon{detailOrder.voucherCode ? ` (${detailOrder.voucherCode})` : ''}
+                        </span>
+                        <span>-{formatIDR(detailOrder.discount)}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between text-neutral-600">
                       <span>Pengiriman</span>
                       <span>

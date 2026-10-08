@@ -12,10 +12,13 @@ import SuccessView from '@/components/store/SuccessView'
 import TrackOrderView from '@/components/store/TrackOrderView'
 import AdminShell from '@/components/admin/AdminShell'
 import { useAppStore } from '@/store/useAppStore'
+import { useSiteStore } from '@/store/useSiteStore'
 import type { HomeData, Category, Brand } from '@/lib/types'
 
 export default function Page() {
   const view = useAppStore((s) => s.view)
+  const version = useSiteStore((s) => s.version)
+  const setSiteConfig = useSiteStore((s) => s.setSiteConfig)
 
   const [homeData, setHomeData] = useState<HomeData | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
@@ -23,6 +26,7 @@ export default function Page() {
   const [homeLoading, setHomeLoading] = useState(true)
 
   // Muat data dasar (kategori & brand untuk header/footer/filter)
+  // `version` naik setiap kali admin menyimpan perubahan konfigurasi → data otomatis dimuat ulang
   useEffect(() => {
     let cancelled = false
     fetch('/api/home')
@@ -35,6 +39,7 @@ export default function Page() {
         setHomeData(data)
         setCategories(data.categories)
         setBrands(data.brands)
+        setSiteConfig(data.settings || {}, data.flashWindow, data.articles || [])
       })
       .catch((e) => console.error(e))
       .finally(() => {
@@ -43,7 +48,7 @@ export default function Page() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [version, setSiteConfig])
 
   // ===== Mode Admin =====
   if (view.name.startsWith('admin')) {

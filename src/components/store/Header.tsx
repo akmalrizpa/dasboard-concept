@@ -4,6 +4,7 @@
 import { useState } from 'react'
 import { useAppStore, View } from '@/store/useAppStore'
 import { useCartStore } from '@/store/useCartStore'
+import { useSiteStore, getSetting } from '@/store/useSiteStore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
@@ -21,13 +22,6 @@ import {
 import { cn } from '@/lib/utils'
 import type { Category } from '@/lib/types'
 
-const PROMO_TEXTS = [
-  'Gratis ongkir min. belanja Rp300.000',
-  'Diskon hingga 70% di Flash Sale',
-  '100% Produk Original & Bergaransi',
-  'Flash Sale setiap hari jam 12.00 WIB',
-]
-
 interface HeaderProps {
   categories: Category[]
 }
@@ -36,8 +30,20 @@ export default function Header({ categories }: HeaderProps) {
   const navigate = useAppStore((s) => s.navigate)
   const view = useAppStore((s) => s.view)
   const cartCount = useCartStore((s) => s.items.reduce((sum, i) => sum + i.quantity, 0))
+  const settings = useSiteStore((s) => s.settings)
   const [searchQuery, setSearchQuery] = useState('')
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+
+  // ===== Konten dinamis dari pengaturan =====
+  const siteName = getSetting<string>(settings, 'site.name', 'BeautyLoka')
+  const searchPlaceholder = getSetting<string>(settings, 'site.searchPlaceholder', 'Cari produk...')
+  const promoTexts = getSetting<string[]>(settings, 'announcement.texts', [])
+  const announcementActive = getSetting<boolean>(settings, 'announcement.active', true)
+
+  // Nama toko bisa 2 bagian (contoh: "Beauty" + "Loka") — warna kedua mengikuti primary
+  const nameParts = siteName.includes(' ')
+    ? [siteName.slice(0, siteName.indexOf(' ')), siteName.slice(siteName.indexOf(' ') + 1)]
+    : [siteName, '']
 
   const isStorefront = !view.name.startsWith('admin')
 
@@ -57,19 +63,21 @@ export default function Header({ categories }: HeaderProps) {
     { slug: 'semua', name: 'Semua Produk', icon: '🛍️' },
   ]
 
-  const promoText = [...PROMO_TEXTS, ...PROMO_TEXTS].join('  •  ')
+  const promoText = promoTexts.length > 0 ? [...promoTexts, ...promoTexts].join('  •  ') : ''
 
   if (!isStorefront) return null
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
-      {/* Promo marquee bar */}
-      <div className="bg-neutral-900 text-white overflow-hidden">
-        <div className="flex whitespace-nowrap py-1.5 text-xs animate-marquee">
-          <span className="px-4">{promoText}</span>
-          <span className="px-4">{promoText}</span>
+      {/* Promo marquee bar (teks dari pengaturan admin) */}
+      {announcementActive && promoTexts.length > 0 && (
+        <div className="bg-neutral-900 text-white overflow-hidden">
+          <div className="flex whitespace-nowrap py-1.5 text-xs animate-marquee">
+            <span className="px-4">{promoText}</span>
+            <span className="px-4">{promoText}</span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Main header */}
       <div className="container mx-auto px-4">
@@ -86,7 +94,8 @@ export default function Header({ categories }: HeaderProps) {
               <div className="flex items-center gap-2 border-b p-4">
                 <Sparkles className="h-5 w-5 text-primary" />
                 <span className="font-bold text-lg tracking-tight">
-                  Beauty<span className="text-primary">Loka</span>
+                  {nameParts[0]}
+                  {nameParts[1] && <span className="text-primary">{nameParts[1]}</span>}
                 </span>
               </div>
               <nav className="p-2" aria-label="Kategori produk">
@@ -125,15 +134,16 @@ export default function Header({ categories }: HeaderProps) {
             </SheetContent>
           </Sheet>
 
-          {/* Logo */}
+          {/* Logo (nama toko dari pengaturan) */}
           <button
             onClick={() => navigate({ name: 'home' })}
             className="flex items-center gap-1.5 shrink-0"
-            aria-label="BeautyLoka - kembali ke beranda"
+            aria-label={`${siteName} - kembali ke beranda`}
           >
             <Sparkles className="h-6 w-6 md:h-7 md:w-7 text-primary" />
             <span className="font-bold text-lg md:text-2xl tracking-tight">
-              Beauty<span className="text-primary">Loka</span>
+              {nameParts[0]}
+              {nameParts[1] && <span className="text-primary">{nameParts[1]}</span>}
             </span>
           </button>
 
@@ -147,7 +157,7 @@ export default function Header({ categories }: HeaderProps) {
               type="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari serum, sunscreen, lipstick, brand..."
+              placeholder={searchPlaceholder}
               className="w-full rounded-full border-neutral-200 bg-neutral-50 pr-12 pl-4 h-11 focus-visible:ring-primary"
               aria-label="Cari produk"
             />
@@ -217,7 +227,7 @@ export default function Header({ categories }: HeaderProps) {
               autoFocus
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari produk kecantikan..."
+              placeholder={searchPlaceholder}
               className="w-full rounded-full border-neutral-200 bg-neutral-50 pr-12"
               aria-label="Cari produk"
             />
