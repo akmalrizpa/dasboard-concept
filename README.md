@@ -252,3 +252,7 @@ npm start         # jalankan server (memakai Bun)
 
 - Gambar produk memakai URL eksternal yang tersimpan di database; kumpulan URL-nya ada di `scripts/img/all_urls.json` — sehingga seed bisa dijalankan ulang tanpa jaringan.
 - Proyek ini dibuat untuk keperluan demo/pembelajaran. Untuk produksi sungguhan, pertimbangkan: payment gateway asli (Midtrans/Xendit), autentikasi pelanggan, dan backup rutin Neon.
+
+## 👤 Author
+
+**Akmal Rizpa** — [github.com/akmalrizpa](https://github.com/akmalrizpa)
