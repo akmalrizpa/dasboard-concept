@@ -67,3 +67,18 @@ Work Log:
 Stage Summary:
 - ✅ https://github.com/akmalrizpa/dasboard-concept berisi webstore lengkap + db/custom.db ter-seed + semua source
 - ⚠️ Catatan user: token pernah dibagikan di chat (sebaiknya regenerate di GitHub); ganti password admin (admin/admin123) sebelum dipakai produksi
+
+---
+Task ID: 4
+Agent: main (Super Z)
+Task: Buat README dokumentasi untuk repo GitHub
+
+Work Log:
+- Verifikasi fakta proyek sebelum menulis: API routes (7 publik + 13 admin), 15 model Prisma, kredensial seed (admin/admin123), struktur src/, dependensi, cara akses admin (ikon akun header → view admin-login SPA)
+- Perbaiki bug portabilitas: scripts/seed.ts memakai path absolut /home/z/my-project/scripts/img/all_urls.json → diganti new URL('./img/all_urls.json', import.meta.url); smoke test lulus (14 kategori gambar dimuat)
+- Tulis README.md (Bahasa Indonesia): screenshot storefront & admin (dari scripts/img), fitur, tabel teknologi, struktur proyek, quick start (clone→env→install→prisma generate→dev), login admin + peringatan, cara reset DB, tabel 15 model, dokumentasi API publik & admin + contoh curl, tabel "ubah konten tanpa sentuh kode", aturan voucher (PERCENT/FIXED/FREE_SHIPPING), catatan keamanan (password default, ADMIN_TOKEN_SECRET, .env), build produksi
+- Commit & push: ec74b91 ke origin/main, verifikasi sinkron
+
+Stage Summary:
+- ✅ README.md lengkap berbahasa Indonesia tampil di halaman depan repo GitHub (dengan screenshot)
+- ✅ Seed script kini portable — bisa dijalankan dari clone mana pun
