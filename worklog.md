@@ -82,3 +82,24 @@ Work Log:
 Stage Summary:
 - ✅ README.md lengkap berbahasa Indonesia tampil di halaman depan repo GitHub (dengan screenshot)
 - ✅ Seed script kini portable — bisa dijalankan dari clone mana pun
+
+---
+Task ID: 5
+Agent: main (Super Z)
+Task: Siapkan project untuk Vercel + NeonDB (PostgreSQL) — user tinggal apply connection string
+
+Work Log:
+- Audit: tidak ada raw SQL (semua via Prisma client, aman lintas DB); gambar pakai <img> (tanpa config Vercel); next.config standalone OK untuk Vercel
+- Konversi schema: provider sqlite→postgresql + directUrl=DIRECT_DATABASE_URL (pola kanonik Neon: pooled runtime / direct CLI)
+- package.json: postinstall prisma generate (kunci build Vercel); .env.example ditulis ulang (panduan direct vs pooled)
+- Sandbox: platform men-export DATABASE_URL SQLite lama ke env shell (menang atas .env) → prisma db push & dev.sh kini source .env dulu (override)
+- Postgres lokal 18 via embedded-postgres (.pgdev, gitignored): boot.sh pakai pg_ctl daemon (postgres jadi session-leader orphan → bertahan lintas perintah shell; pendekatan node-parent pertama gagal karena exit-handler mematikan PG saat shell berakhir)
+- dev server: setsid bun run dev (session-leader orphan) — kini juga bertahan lintas perintah; dev.sh di-patch (source .env + auto-boot PG)
+- Seed ulang di PG; E2E 23/23 lulus di PostgreSQL (home, katalog, detail, checkout config, voucher BEAUTY10, checkout server-side termasuk gratis-ongkir threshold, track, admin login/stats/settings dinamis, CRUD produk) — 9 "gagal" pertama ternyata asumsi shape respons e2e saya, bukan bug app
+- db/custom.db (SQLite) di-untrack; README: Quick Start Neon-first + section baru "Deploy ke Vercel + NeonDB" (env vars, pgbouncer, tips autosuspend)
+- Commit eb70e9b push ke origin/main — sinkron
+
+Stage Summary:
+- ✅ Repo kini PostgreSQL murni — clone mana pun tinggal isi .env dengan connection string Neon
+- ✅ Terdiverifikasi E2E penuh di PostgreSQL 18 (engine sama dengan Neon)
+- ✅ Preview sandbox jalan di Postgres lokal; dev.sh self-healing (boot PG + .env otoritatif)
