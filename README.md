@@ -2,7 +2,7 @@
 
 **BeautyLoka** adalah aplikasi e-commerce kecantikan full-stack terinspirasi [Sociolla](https://www.sociolla.com/), terdiri dari **storefront pelanggan** dan **admin dashboard** dalam satu aplikasi.
 
-Dibuat **100% dinamis**: seluruh konten — produk, harga & promo, voucher, jendela flash sale, ongkir, metode pembayaran, teks promosi, artikel, hingga footer — disimpan di database dan dapat diubah dari dashboard admin **tanpa menyentuh source code sama sekali**.
+Dibuat **100% dinamis**: seluruh konten — produk, harga & promo, voucher, jendela flash sale, ongkir, metode pembayaran, teks promosi, artikel, hingga footer — disimpan di database (**PostgreSQL**, rekomendasi gratis: [Neon](https://neon.tech)) dan dapat diubah dari dashboard admin **tanpa menyentuh source code sama sekali**.
 
 ![Storefront](scripts/img/final_home.png)
 
@@ -37,7 +37,7 @@ Dibuat **100% dinamis**: seluruh konten — produk, harga & promo, voucher, jend
 | React 19 + TypeScript | UI & type safety |
 | Tailwind CSS 4 | Styling |
 | shadcn/ui + Radix UI | Komponen antarmuka |
-| Prisma ORM + SQLite | Database (`db/custom.db`) |
+| Prisma ORM + PostgreSQL | Database — gratis & serverless di [Neon](https://neon.tech) |
 | Zustand | State management |
 | Recharts | Grafik dashboard admin |
 | date-fns | Format tanggal & countdown |
@@ -45,8 +45,7 @@ Dibuat **100% dinamis**: seluruh konten — produk, harga & promo, voucher, jend
 ## 📁 Struktur Proyek
 
 ```
-├── db/custom.db              # Database SQLite (sudah terisi data contoh)
-├── prisma/schema.prisma      # Skema 15 model
+├── prisma/schema.prisma      # Skema 15 model (PostgreSQL)
 ├── scripts/
 │   ├── seed.ts               # Seed data inti (admin, produk, pesanan, …)
 │   ├── seed_dynamic.ts       # Seed konfigurasi dinamis (settings, voucher, …)
@@ -68,25 +67,43 @@ Dibuat **100% dinamis**: seluruh konten — produk, harga & promo, voucher, jend
 
 ## 🚀 Mulai Cepat
 
-**Prasyarat:** Node.js ≥ 20 (disarankan 24), npm. Opsional: Bun ≥ 1.3.
+**Prasyarat:** Node.js ≥ 20 (disarankan 24), npm. Opsional: Bun ≥ 1.3. Database: PostgreSQL — pakai **Neon** (gratis, tanpa kartu kredit).
+
+### A. Buat database di Neon (± 2 menit)
+
+1. Buka **https://neon.tech** → daftar (bisa pakai akun Google/GitHub).
+2. Klik **Create project** — beri nama `beautyloka`, pilih region **Singapore** (terdekat dari Indonesia).
+3. Setelah project terbentuk, klik **Connect** → pilih tab **Prisma** → akan tampil dua connection string:
+   - **Direct connection** (port 5432) → untuk komputermu (dev, `prisma db push`, seed)
+   - **Pooled connection** (ada `-pooler`, port 6543) → untuk Vercel (runtime)
+
+> 💡 Simpan kedua string itu — langkah deploy Vercel memakai yang *pooled*.
+
+### B. Siapkan proyek di komputermu
 
 ```bash
 # 1. Clone
 git clone https://github.com/akmalrizpa/dasboard-concept.git
 cd dasboard-concept
 
-# 2. Siapkan environment
+# 2. Environment — tempel connection string DIRECT dari Neon
 cp .env.example .env
+#   lalu edit .env: isi DATABASE_URL & DIRECT_DATABASE_URL
+#   dengan string DIRECT (…neon.tech/neondb?sslmode=require)
 
-# 3. Install dependency & generate Prisma Client
+# 3. Install dependency (sekalian generate Prisma Client lewat postinstall)
 npm install
-npx prisma generate
 
-# 4. Jalankan
+# 4. Buat tabel di Neon + isi data contoh (produk, promo, voucher, pengaturan)
+npx prisma db push
+npx tsx scripts/seed.ts
+npx tsx scripts/seed_dynamic.ts
+
+# 5. Jalankan
 npm run dev
 ```
 
-Buka **http://localhost:3000** — database sudah terisi data contoh (32 produk, promo, voucher, pengaturan), jadi aplikasi langsung bisa dipakai.
+Buka **http://localhost:3000** — toko tampil lengkap: 32 produk, 6 kategori, 12 brand, voucher, flash sale, semua dari database.
 
 ### 🔐 Login Admin
 
@@ -99,15 +116,43 @@ Klik ikon akun di pojok kanan atas header → **Admin**, lalu masuk dengan:
 
 > ⚠️ **Segera ganti password ini** melalui dashboard sebelum dipakai lebih lanjut.
 
-### 🔄 Menyiapkan Ulang Database (opsional)
+### 🔄 Reset / isi ulang database
+
+Semua perintah mengikuti `DATABASE_URL` di `.env` — arahkan ke database Neon mana pun (branch `main` atau branch development Neon), lalu:
 
 ```bash
 npm run db:push                   # sinkronkan skema ke database
-npx tsx scripts/seed.ts           # seed data inti
-npx tsx scripts/seed_dynamic.ts   # seed konfigurasi dinamis
+npx tsx scripts/seed.ts           # seed data inti (admin, produk, pesanan, …)
+npx tsx scripts/seed_dynamic.ts   # seed konfigurasi dinamis (settings, voucher, …)
 ```
 
 Bisa juga memakai Bun: `bun run scripts/seed.ts`.
+
+> ⚠️ Seed menghapus data lama di database tujuan (mulai dari `deleteMany`). Jangan dijalankan di database yang sudah berisi pesanan asli.
+
+## ☁️ Deploy ke Vercel + NeonDB (Panduan Pemula)
+
+Setelah aplikasi jalan di komputermu (langkah Mulai Cepat), saatnya online:
+
+1. **Push ke GitHub** — pastikan commit terbaru sudah naik (repo ini).
+2. Buka **https://vercel.com** → daftar/masuk pakai akun **GitHub**.
+3. Klik **Add New… → Project** → pilih repo `dasboard-concept` → **Import**.
+4. Di halaman pengaturan, temukan **Environment Variables** dan tambahkan (lingkungan: Production, Preview, Development — centang semua):
+
+   | Key | Value | Ambil dari Neon (tombol Connect) |
+   |---|---|---|
+   | `DATABASE_URL` | string **Pooled connection** + tambahkan `&pgbouncer=true` | tab Prisma / pooled (port 6543) |
+   | `DIRECT_DATABASE_URL` | string **Direct connection** | direct (port 5432) |
+   | `ADMIN_TOKEN_SECRET` *(opsional tapi disarankan)* | string acak panjang, mis. 32+ karakter | — |
+
+5. Klik **Deploy** → tunggu ± 1–2 menit sampai status **Ready** — webstore pun online 🎉
+6. Buka domain `…vercel.app` → login admin (ikon akun kanan atas) → ganti konten sesukamu.
+
+**Kenapa pooled vs direct?** Vercel menjalankan fungsi serverless yang datang-pergi; endpoint **pooled** (PgBouncer) menjaga koneksi tetap efisien. Untuk `prisma db push` / seed dari komputermu, **direct** yang dipakai.
+
+**Tips Neon:** paket gratis 0,5 GB (jauh di atas kebutuhan toko ini). Setelah idle, database *suspend* otomatis — request pertama setelah lama tidak diakses butuh ± 1 detik untuk “bangun” (normal, bukan error).
+
+**Perubahan konten setelah deploy** — tetap dari dashboard admin, tersimpan ke Neon, tanpa deploy ulang dan tanpa sentuh kode. Hanya perubahan *kode* (fitur baru) yang butuh `git push` → Vercel otomatis deploy ulang.
 
 ## 🗄️ Basis Data
 
@@ -193,8 +238,8 @@ Semua voucher dapat dibatasi `minPurchase`, `usageLimit`, dan periode aktif.
 ## 🛡️ Keamanan
 
 1. **Ganti password admin default** (`admin/admin123`) segera setelah clone.
-2. Untuk produksi, isi `ADMIN_TOKEN_SECRET` di `.env` dengan string acak yang panjang.
-3. `.env` tidak dibawa ke repo (sudah di-gitignore) — jangan pernah commit kredensial.
+2. Untuk produksi, isi `ADMIN_TOKEN_SECRET` (di `.env` lokal dan di **Environment Variables Vercel**) dengan string acak yang panjang.
+3. `.env` tidak dibawa ke repo (sudah di-gitignore) — jangan pernah commit kredensial. Connection string Neon = kredensial, jangan dibagikan.
 
 ## 📦 Build Produksi
 
@@ -206,4 +251,4 @@ npm start         # jalankan server (memakai Bun)
 ## 📝 Catatan
 
 - Gambar produk memakai URL eksternal yang tersimpan di database; kumpulan URL-nya ada di `scripts/img/all_urls.json` — sehingga seed bisa dijalankan ulang tanpa jaringan.
-- Proyek ini dibuat untuk keperluan demo/pembelajaran. Untuk produksi sungguhan, pertimbangkan: payment gateway asli, autentikasi pelanggan, dan migrasi dari SQLite ke PostgreSQL.
+- Proyek ini dibuat untuk keperluan demo/pembelajaran. Untuk produksi sungguhan, pertimbangkan: payment gateway asli (Midtrans/Xendit), autentikasi pelanggan, dan backup rutin Neon.

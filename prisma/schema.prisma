@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")        // runtime aplikasi (di Vercel: pakai connection string POOLED Neon)
+  directUrl = env("DIRECT_DATABASE_URL") // prisma CLI: db push / migrate (pakai connection string DIRECT Neon)
 }
 
 model Category {
