@@ -345,8 +345,9 @@ export default function HomePage({ data, loading }: { data: HomeData | null; loa
         </div>
       </section>
 
-      {/* Beauty journal — artikel dari pengaturan admin */}
-      {articles.length > 0 && (
+      {/* Beauty journal — disembunyikan sementara (mobile & desktop) supaya tampilan beda dari referensi.
+          Untuk mengaktifkan lagi: hapus tanda komentar pada blok di bawah. */}
+      {/* {articles.length > 0 && (
         <section className="border-t border-neutral-100 bg-secondary/30 py-10" aria-label={journalTitle}>
           <div className="container mx-auto px-4">
             <SectionHeader title={journalTitle} emoji={journalEmoji} />
@@ -369,7 +370,7 @@ export default function HomePage({ data, loading }: { data: HomeData | null; loa
             </div>
           </div>
         </section>
-      )}
+      )} */}
     </main>
   )
 }
